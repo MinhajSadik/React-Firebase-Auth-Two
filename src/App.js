@@ -14,9 +14,10 @@ function App() {
 
   const [user, setUser] = useState({
     isSignedIn: false,
-    name: '',
-    email: '',
-    photo: ''
+    name: ' ',
+    email: ' ',
+    password: ' ',
+    photo: ' '
   })
 
   const googleProvider = new firebase.auth.GoogleAuthProvider();
