@@ -7,7 +7,7 @@ import firebase from "firebase/app"
 // /\S+@\S+\.\S+/.test()
 
 const Facebook = () => {
-
+    const [newUser, setNewUser] = useState(false);
     const [user, setUser] = useState({
         isSignedIn: false,
         name: ' ',
@@ -15,7 +15,7 @@ const Facebook = () => {
         password: ' ',
         photo: ' ',
         error: ' ',
-        success: ' '
+        success: false
     })
     const handleBlur = (e) => {
         // debugger;
@@ -38,7 +38,7 @@ const Facebook = () => {
     }
 
     const handleSubmit = (e) => {
-        if (user.email && user.password) {
+        if ( newUser && user.email && user.password) {
             firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
                 .then(res => {
                     const newUserInfo = { ...user };
@@ -54,14 +54,34 @@ const Facebook = () => {
                     // ..
                 });
         }
+        if (!newUser && user.email && user.password) {
+            firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+                .then(res => {
+                    const newUserInfo = { ...user };
+                    newUserInfo.error = ' ';
+                    newUserInfo.success = true;
+                    setUser(newUserInfo);
+                })
+                .catch(error => {
+                    const newUserInfo = { ...user };
+                    newUserInfo.error = error.message;
+                    newUserInfo.success = false;
+                    setUser(newUserInfo)
+            })
+        }
+
         e.preventDefault();
     }
     return (
         <div>
             <h1>This Is Facebook Login</h1>
-           
+            <input type="checkbox" onChange={() => setNewUser(!newUser)} name="newUser" id="" />
+            <label htmlFor="newUser">NewUser Registration</label>
+
             <form onSubmit={handleSubmit}>
-                <input type="text" onBlur={handleBlur}name="name" placeholder="Your Name" required />
+                {
+                    newUser && <input type="text" onBlur={handleBlur} name="name" placeholder="Your Name" required />
+                }
                 <br/>
                 <input type="text" onBlur={handleBlur} name="email" id="" placeholder="Write Your Email Address! " required />
                 <br />
@@ -69,8 +89,8 @@ const Facebook = () => {
                 <br />
                 <input type="submit" value="Submit" />
             </form>
-            <p style={{ color: 'red' }}>{user.error}</p>
-            {user.success && <p style={{ color: 'green' }}>User Created successfully</p>}
+            {user.error && <p style={{ color: 'red' }}>{user.error}</p>}
+            {user.success && <p style={{ color: 'green' }}>User {newUser ? "Created" : "Loged In"} Successfully</p>}
         </div>
     );
 };
